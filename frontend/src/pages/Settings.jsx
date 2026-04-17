@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { MdPerson, MdSecurity, MdNotifications, MdSave, MdCheck, MdWarning } from 'react-icons/md'
+import { MdManageAccounts, MdSecurity, MdNotifications, MdSave, MdCheck, MdWarning } from 'react-icons/md'
 import Header from '../components/Header'
 import { useAuth } from '../context/AuthContext'
 import './Settings.css'
@@ -28,30 +28,41 @@ const Toggle = ({ label, desc, checked, onChange }) => (
 
 export default function Settings() {
   const { user } = useAuth()
-  const [name,  setName]  = useState(user?.name  || 'Alex Mercer')
-  const [email, setEmail] = useState(user?.email || 'alex.mercer@vaultshare.io')
+  const isAdmin = user?.role === 'admin'
   const [saved, setSaved] = useState(false)
 
-  const [twoFA,          setTwoFA]          = useState(true)
-  const [loginAlerts,    setLoginAlerts]    = useState(true)
-  const [ipLogging,      setIpLogging]      = useState(true)
-  const [forceEncrypt,   setForceEncrypt]   = useState(true)
-  const [autoExpire,     setAutoExpire]     = useState(false)
+  const [defaultView, setDefaultView] = useState('list')
+  const [timezone, setTimezone] = useState('Asia/Kolkata')
+  const [compactMode, setCompactMode] = useState(false)
+  const [showFilePreviews, setShowFilePreviews] = useState(true)
+
+  const [twoFA, setTwoFA] = useState(true)
+  const [loginAlerts, setLoginAlerts] = useState(true)
+  const [ipLogging, setIpLogging] = useState(true)
+  const [forceEncrypt, setForceEncrypt] = useState(true)
+  const [autoExpire, setAutoExpire] = useState(false)
   const [autoExpireDays, setAutoExpireDays] = useState('30')
 
-  const [emailOnShare,    setEmailOnShare]    = useState(true)
+  const [emailOnShare, setEmailOnShare] = useState(true)
   const [emailOnDownload, setEmailOnDownload] = useState(false)
-  const [emailOnLogin,    setEmailOnLogin]    = useState(true)
-  const [emailOnExpiry,   setEmailOnExpiry]   = useState(true)
-  const [weeklyReport,    setWeeklyReport]    = useState(false)
+  const [emailOnLogin, setEmailOnLogin] = useState(true)
+  const [emailOnExpiry, setEmailOnExpiry] = useState(true)
+  const [weeklyReport, setWeeklyReport] = useState(false)
 
-  const handleSave = async () => { setSaved(true); setTimeout(() => setSaved(false), 2500) }
+  const handleSave = async () => {
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2500)
+  }
+
+  const planFeatures = isAdmin
+    ? ['100 GB Storage', '10,000 Shares/mo', 'AES-256 Encryption', 'Full Access Logs', 'Role-Based Access', 'Priority Support']
+    : ['5 GB Storage', '100 Shares/mo', 'AES-256 Encryption', 'Basic Access Logs', 'Preference Controls', 'Email Alerts']
 
   return (
     <div className="page-content settings-page">
       <Header
         title="Settings"
-        subtitle="Manage your account, security, and preferences"
+        subtitle={isAdmin ? 'Manage platform security and preferences' : 'Manage your account preferences'}
         actions={
           <button className={`btn ${saved ? 'btn-saved' : 'btn-primary'}`} onClick={handleSave}>
             {saved ? <><MdCheck size={15} /> Saved!</> : <><MdSave size={15} /> Save Changes</>}
@@ -61,39 +72,38 @@ export default function Settings() {
 
       <div className="settings-layout">
         <div className="settings-main">
-
-          <Section title={<span style={{display:'flex',alignItems:'center',gap:7}}><MdPerson size={16}/>Profile</span>} desc="Update your personal information">
-            <div className="profile-header">
-              <div className="profile-avatar-big">{user?.avatar || 'AM'}</div>
-              <div className="profile-avatar-actions">
-                <button className="btn btn-ghost btn-sm">Change Photo</button>
-                <button className="btn btn-ghost btn-sm" style={{ color: 'var(--accent-red)' }}>Remove</button>
-              </div>
-            </div>
+          <Section
+            title={<span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><MdManageAccounts size={16} />User Preferences</span>}
+            desc="Control how VaultShare looks and behaves for your account"
+          >
             <div className="settings-form-grid">
               <div className="form-group">
-                <label className="form-label">Full Name</label>
-                <input className="form-input" value={name} onChange={e => setName(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Email Address</label>
-                <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Role</label>
-                <select className="form-input"><option>Admin</option><option>Editor</option><option>Viewer</option></select>
+                <label className="form-label">Default File View</label>
+                <select className="form-input" value={defaultView} onChange={e => setDefaultView(e.target.value)}>
+                  <option value="list">List View</option>
+                  <option value="grid">Grid View</option>
+                </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Timezone</label>
-                <select className="form-input">
-                  <option>UTC-5 (Eastern)</option><option>UTC-8 (Pacific)</option>
-                  <option>UTC+0 (GMT)</option><option>UTC+5:30 (IST)</option>
+                <select className="form-input" value={timezone} onChange={e => setTimezone(e.target.value)}>
+                  <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+                  <option value="UTC">UTC</option>
+                  <option value="America/New_York">America/New_York (EST)</option>
+                  <option value="Europe/London">Europe/London (GMT)</option>
                 </select>
               </div>
             </div>
+            <div className="divider" style={{ margin: '16px 0' }} />
+            <Toggle label="Compact Mode" desc="Reduce spacing in tables and cards" checked={compactMode} onChange={setCompactMode} />
+            <div className="divider" style={{ margin: '8px 0' }} />
+            <Toggle label="Show File Previews" desc="Display thumbnails and quick previews where available" checked={showFilePreviews} onChange={setShowFilePreviews} />
           </Section>
 
-          <Section title={<span style={{display:'flex',alignItems:'center',gap:7}}><MdSecurity size={16}/>Security</span>} desc="Control how your vault is protected">
+          <Section
+            title={<span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><MdSecurity size={16} />Security</span>}
+            desc="Control how your vault is protected"
+          >
             <Toggle label="Two-Factor Authentication" desc="Require a verification code on every login" checked={twoFA} onChange={setTwoFA} />
             <div className="divider" style={{ margin: '8px 0' }} />
             <Toggle label="Login Alerts" desc="Get notified when someone signs into your account" checked={loginAlerts} onChange={setLoginAlerts} />
@@ -111,61 +121,74 @@ export default function Settings() {
             )}
             <div className="divider" style={{ margin: '16px 0' }} />
             <div className="setting-row">
-              <div className="setting-info"><div className="setting-label">Change Password</div><div className="setting-desc">Update your login password</div></div>
-              <button className="btn btn-ghost btn-sm">Change →</button>
+              <div className="setting-info">
+                <div className="setting-label">Change Password</div>
+                <div className="setting-desc">Update your login password</div>
+              </div>
+              <button className="btn btn-ghost btn-sm">Change -&gt;</button>
             </div>
             <div className="setting-row" style={{ marginTop: 8 }}>
-              <div className="setting-info"><div className="setting-label">Active Sessions</div><div className="setting-desc">Manage and revoke logged-in devices</div></div>
-              <button className="btn btn-ghost btn-sm">Manage →</button>
+              <div className="setting-info">
+                <div className="setting-label">Active Sessions</div>
+                <div className="setting-desc">Manage and revoke logged-in devices</div>
+              </div>
+              <button className="btn btn-ghost btn-sm">Manage -&gt;</button>
             </div>
           </Section>
 
-          <Section title={<span style={{display:'flex',alignItems:'center',gap:7}}><MdNotifications size={16}/>Notifications</span>} desc="Choose what alerts you receive">
-            <Toggle label="Email on Share"         desc="When someone accesses your shared link" checked={emailOnShare}    onChange={setEmailOnShare}    />
+          <Section
+            title={<span style={{ display: 'flex', alignItems: 'center', gap: 7 }}><MdNotifications size={16} />Notifications</span>}
+            desc="Choose what alerts you receive"
+          >
+            <Toggle label="Email on Share" desc="When someone accesses your shared link" checked={emailOnShare} onChange={setEmailOnShare} />
             <div className="divider" style={{ margin: '8px 0' }} />
-            <Toggle label="Email on Download"      desc="When a file is downloaded"              checked={emailOnDownload} onChange={setEmailOnDownload} />
+            <Toggle label="Email on Download" desc="When a file is downloaded" checked={emailOnDownload} onChange={setEmailOnDownload} />
             <div className="divider" style={{ margin: '8px 0' }} />
-            <Toggle label="Email on Login"         desc="When a new login is detected"           checked={emailOnLogin}    onChange={setEmailOnLogin}    />
+            <Toggle label="Email on Login" desc="When a new login is detected" checked={emailOnLogin} onChange={setEmailOnLogin} />
             <div className="divider" style={{ margin: '8px 0' }} />
-            <Toggle label="Link Expiry Alerts"     desc="When a share link is about to expire"   checked={emailOnExpiry}   onChange={setEmailOnExpiry}   />
+            <Toggle label="Link Expiry Alerts" desc="When a share link is about to expire" checked={emailOnExpiry} onChange={setEmailOnExpiry} />
             <div className="divider" style={{ margin: '8px 0' }} />
-            <Toggle label="Weekly Activity Report" desc="Summary email every Monday"             checked={weeklyReport}    onChange={setWeeklyReport}    />
+            <Toggle label="Weekly Activity Report" desc="Summary email every Monday" checked={weeklyReport} onChange={setWeeklyReport} />
           </Section>
         </div>
 
         <div className="settings-side">
           <div className="card plan-card">
             <div className="plan-card-header">
-              <span className="badge badge-cyan">PRO PLAN</span>
-              <div className="plan-price-big">$12<span>/mo</span></div>
+              <span className={`badge ${isAdmin ? 'badge-cyan' : 'badge-green'}`}>{isAdmin ? 'PRO PLAN' : `${(user?.plan || 'Free').toUpperCase()} PLAN`}</span>
+              <div className="plan-price-big">{isAdmin ? '$12' : '$0'}<span>/mo</span></div>
             </div>
             <div className="plan-features-list">
-              {['100 GB Storage','10,000 Shares/mo','AES-256 Encryption','Full Access Logs','Role-Based Access','Priority Support'].map(f => (
-                <div key={f} className="plan-feature-item">
-                  <MdCheck size={14} style={{color:'var(--accent-green)',flexShrink:0}} /><span>{f}</span>
+              {planFeatures.map(feature => (
+                <div key={feature} className="plan-feature-item">
+                  <MdCheck size={14} style={{ color: 'var(--accent-green)', flexShrink: 0 }} /><span>{feature}</span>
                 </div>
               ))}
             </div>
-            <button className="btn btn-primary" style={{ width:'100%', justifyContent:'center', marginTop:16 }}>Upgrade to Team ↗</button>
+            <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 16 }}>
+              {isAdmin ? 'Upgrade to Team ->' : 'Upgrade Plan ->'}
+            </button>
           </div>
 
           <div className="card" style={{ marginTop: 20 }}>
             <div className="card-title" style={{ marginBottom: 16 }}>Security Score</div>
-            <div style={{ display:'flex', alignItems:'baseline', gap:6, marginBottom:16 }}>
-              <span style={{ fontFamily:'var(--font-display)', fontSize:48, fontWeight:700, color:'var(--accent-green)', textShadow:'0 0 30px rgba(0,255,163,0.3)' }}>94</span>
-              <span style={{ color:'var(--text-muted)' }}>/ 100</span>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 16 }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 700, color: 'var(--accent-green)', textShadow: '0 0 30px rgba(0,255,163,0.3)' }}>94</span>
+              <span style={{ color: 'var(--text-muted)' }}>/ 100</span>
             </div>
-            <div className="progress-bar" style={{ marginBottom:16 }}><div className="progress-fill" style={{ width:'94%' }} /></div>
-            <div style={{ fontSize:12, color:'var(--text-muted)' }}>Enable IP Whitelisting to reach 100%</div>
+            <div className="progress-bar" style={{ marginBottom: 16 }}><div className="progress-fill" style={{ width: '94%' }} /></div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Enable IP Whitelisting to reach 100%</div>
           </div>
 
-          <div className="card danger-zone" style={{ marginTop: 20 }}>
-            <div className="card-title" style={{ color:'var(--accent-red)', marginBottom:16, display:'flex', alignItems:'center', gap:6 }}>
-              <MdWarning size={16} /> Danger Zone
+          {isAdmin && (
+            <div className="card danger-zone" style={{ marginTop: 20 }}>
+              <div className="card-title" style={{ color: 'var(--accent-red)', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <MdWarning size={16} /> Danger Zone
+              </div>
+              <button className="btn btn-danger btn-sm" style={{ width: '100%', justifyContent: 'center', marginBottom: 8 }}>Delete All Share Links</button>
+              <button className="btn btn-danger btn-sm" style={{ width: '100%', justifyContent: 'center' }}>Delete Account</button>
             </div>
-            <button className="btn btn-danger btn-sm" style={{ width:'100%', justifyContent:'center', marginBottom:8 }}>Delete All Share Links</button>
-            <button className="btn btn-danger btn-sm" style={{ width:'100%', justifyContent:'center' }}>Delete Account</button>
-          </div>
+          )}
         </div>
       </div>
     </div>
