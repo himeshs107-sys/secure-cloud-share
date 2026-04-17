@@ -13,7 +13,6 @@ import Logs from './pages/Logs'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
 import Users from './pages/Users'
-import SharedAccess from './pages/SharedAccess'
 import './App.css'
 
 function AppLayout({ children }) {
@@ -39,25 +38,17 @@ function AppLayout({ children }) {
 }
 
 function Protected({ children, adminOnly = false }) {
-  const { user, isLoading } = useAuth()
-  if (isLoading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', height:'100vh', color:'var(--accent-cyan)', gap:12 }}>
-      <span className="spinner" style={{ width:20, height:20, borderWidth:2 }} />
-      <span style={{ fontSize:14, opacity:0.7 }}>Loading VaultShare…</span>
-    </div>
-  )
+  const { user } = useAuth()
   if (!user) return <Navigate to="/login" replace />
   if (adminOnly && user.role !== 'admin') return <Navigate to="/dashboard" replace />
   return <AppLayout>{children}</AppLayout>
 }
 
 function AppRoutes() {
-  const { user, isLoading } = useAuth()
-  if (isLoading) return null
+  const { user } = useAuth()
   return (
     <Routes>
       <Route path="/"                element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
-      <Route path="/s/:token"        element={<SharedAccess />} />
       <Route path="/login"           element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/register"        element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
       <Route path="/forgot-password" element={user ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} />
@@ -66,7 +57,7 @@ function AppRoutes() {
       <Route path="/shared"    element={<Protected><Shared /></Protected>} />
       <Route path="/logs"      element={<Protected><Logs /></Protected>} />
       <Route path="/profile"   element={<Protected><Profile /></Protected>} />
-      <Route path="/settings"  element={<Protected adminOnly><Settings /></Protected>} />
+      <Route path="/settings"  element={<Protected><Settings /></Protected>} />
       <Route path="/users"     element={<Protected adminOnly><Users /></Protected>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -82,4 +73,3 @@ export default function App() {
     </BrowserRouter>
   )
 }
-
