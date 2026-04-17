@@ -13,6 +13,7 @@ import Logs from './pages/Logs'
 import Settings from './pages/Settings'
 import Profile from './pages/Profile'
 import Users from './pages/Users'
+import SharedAccess from './pages/SharedAccess'
 import './App.css'
 
 function AppLayout({ children }) {
@@ -56,6 +57,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/"                element={<Navigate to={user ? '/dashboard' : '/login'} replace />} />
+      <Route path="/s/:token"        element={<SharedAccess />} />
       <Route path="/login"           element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
       <Route path="/register"        element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
       <Route path="/forgot-password" element={user ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} />
@@ -80,3 +82,4 @@ export default function App() {
     </BrowserRouter>
   )
 }
+
