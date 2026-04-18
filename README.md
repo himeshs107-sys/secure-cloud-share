@@ -65,16 +65,6 @@ Frontend runs at → **http://localhost:5173**
 
 ---
 
-## Default Accounts (after seeding)
-
-| Name    | Email             | Password    | Role  |
-|---------|-------------------|-------------|-------|
-| Himesh  | himesh@gmail.com  | Himesh@123  | Admin |
-| Kaushal | kaushal@gmail.com | Kaushal@123 | User  |
-| Milan   | milan@gmail.com   | Milan@123   | User  |
-
----
-
 ## Everything is real-time
 
 - Upload files → AES-256 encrypted on server
