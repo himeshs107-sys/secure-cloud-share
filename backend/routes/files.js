@@ -1,4 +1,15 @@
-router.post('/upload', upload.single('file'), async (req, res, next) => {
+const express  = require('express')
+const path     = require('path')
+const fs       = require('fs')
+const File     = require('../models/File')
+const User     = require('../models/User')
+const { protect }            = require('../middleware/auth')
+const { upload, cloudinary } = require('../config/cloudinary')
+const { log }                = require('../utils/logger')
+
+const router = express.Router()
+router.use(protect)
+  router.post('/upload', upload.single('file'), async (req, res, next) => {
   try {
     if (!req.file)
       return res.status(400).json({ success: false, message: 'No file provided.' })
