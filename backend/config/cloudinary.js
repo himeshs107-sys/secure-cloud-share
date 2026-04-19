@@ -8,40 +8,26 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-// Store encrypted file buffer directly to Cloudinary
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: async (req, file) => {
-    return {
-      folder:        'vaultshare/uploads',
-      resource_type: 'raw',          // raw = any file type (not just images)
-      public_id:     `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      use_filename:  false,
-    }
+  params: {
+    folder:        'vaultshare',
+    resource_type: 'raw',   // allows ALL file types
+    use_filename:  false,
+    unique_filename: true,
   },
 })
 
-// Block only executables
-const BLOCKED_TYPES = [
-  'application/x-msdownload',
-  'application/x-msdos-program',
-  'application/x-bat',
-]
-
-const fileFilter = (_req, file, cb) => {
-  if (BLOCKED_TYPES.includes(file.mimetype)) {
-    cb(new Error('Executable files are not allowed.'), false)
-  } else {
-    cb(null, true)
-  }
-}
-
-const MAX_SIZE_MB = parseInt(process.env.MAX_FILE_SIZE_MB || '50', 10)
+const BLOCKED = ['application/x-msdownload','application/x-msdos-program','application/x-bat']
 
 const upload = multer({
   storage,
-  fileFilter,
-  limits: { fileSize: MAX_SIZE_MB * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    BLOCKED.includes(file.mimetype)
+      ? cb(new Error('Executable files not allowed'), false)
+      : cb(null, true)
+  },
+  limits: { fileSize: (parseInt(process.env.MAX_FILE_SIZE_MB) || 50) * 1024 * 1024 },
 })
 
 module.exports = { upload, cloudinary }
